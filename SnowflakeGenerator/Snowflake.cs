@@ -53,7 +53,7 @@ namespace SnowflakeGenerator
         /// </summary>
         /// <returns>A new unique ID as a 64-bit unsigned integer.</returns>
         /// <exception cref="SnowflakeException">Thrown when an ID generation error occurs.</exception>
-        public ulong NextID()
+        public long NextID()
         {
             long elapsedTime;
             uint sequence;
@@ -99,7 +99,8 @@ namespace SnowflakeGenerator
                        ((ulong)_machineID << _machineIDShift) |
                        sequence;
 
-            return id;
+            // Apply a mask to unset the most significant bit
+            return (long)(id & 0x7FFFFFFFFFFFFFFF);
         }
     }
 }
