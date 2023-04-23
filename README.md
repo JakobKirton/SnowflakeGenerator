@@ -59,7 +59,7 @@ Generate a new unique ID:
 ulong id = snowflake.NextID();
 ```
 
-NextID will throw a TimestampOverflowException once it reaches the limit of the TimeStamp.
+```csharp NextID()``` will throw a `TimestampOverflowException` once it reaches the limit of the TimeStamp.
 
 ## Settings
 
