@@ -12,35 +12,35 @@ SnowflakeGenerator is a unique ID generator based on [Twitter's Snowflake](https
 
 To install the SnowflakeGenerator library, you can use the following command in the Package Manager Console:
 ```
-    Install-Package SnowflakeGenerator`
+Install-Package SnowflakeGenerator`
 ```
 Alternatively, you can use the .NET CLI:
 ```
-    dotnet add package SnowflakeGenerator
+dotnet add package SnowflakeGenerator
 ```
 
 # Usage
 
 First, import the SnowflakeGenerator namespace:
 ```csharp
-    using SnowflakeGenerator;
+using SnowflakeGenerator;
 ```
 
 Create a new instance of the `Snowflake` class with optional settings:
 
 ```csharp
-    Settings settings = new Settings 
-    { 
-	    MachineID = 1,
-	    CustomEpoch = new DateTimeOffset(2020, 1, 1, 0, 0, 0, TimeSpan.Zero) 
-    };
+Settings settings = new Settings 
+{ 
+    MachineID = 1,
+    CustomEpoch = new DateTimeOffset(2020, 1, 1, 0, 0, 0, TimeSpan.Zero) 
+};
     
-    Snowflake snowflake = new Snowflake(settings);
+Snowflake snowflake = new Snowflake(settings);
 ```    
 Generate a new unique ID:
 
 ```csharp
-    ulong id = snowflake.NextID();
+ulong id = snowflake.NextID();
 ```
 
 ## Settings
