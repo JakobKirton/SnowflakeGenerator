@@ -15,7 +15,7 @@ To install the SnowflakeGenerator library, you can use the following command in 
 Install-Package SnowflakeGenerator
 ```
 Alternatively, you can use the .NET CLI:
-```powershell
+```
 dotnet add package SnowflakeGenerator
 ```
 
