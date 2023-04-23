@@ -9,8 +9,8 @@ namespace SnowflakeGenerator
     /// </summary>
     public class Snowflake
     {
-        private const int BitLenMachineID = 10;
-        private const int BitLenSequence = 12;
+        private readonly int _bitLenMachineID;
+        private readonly int _bitLenSequence;
 
         private readonly long _customEpoch;
         private readonly uint _machineID;
@@ -18,9 +18,9 @@ namespace SnowflakeGenerator
         private long _lastTimestamp;
         private int _sequence;
 
-        private const uint _sequenceMask = (1 << BitLenSequence) - 1;
-        private const int _timestampShift = BitLenMachineID + BitLenSequence;
-        private const int _machineIDShift = BitLenSequence;
+        private readonly uint _sequenceMask;
+        private readonly int _timestampShift;
+        private readonly int _machineIDShift;
 
         /// <summary>
         /// Initializes a new instance of the Snowflake class with the specified settings.
@@ -30,9 +30,18 @@ namespace SnowflakeGenerator
         {
             uint machineID = settings?.MachineID ?? 0;
 
-            if (machineID > (1 << BitLenMachineID) - 1)
+            _bitLenMachineID = settings?.MachineIDBitLength ?? 10;
+            _bitLenSequence = settings?.SequenceBitLength ?? 12;
+
+            // Validate the sum of bit lengths
+            if (_bitLenMachineID + _bitLenSequence > 22)
             {
-                throw new InvalidMachineIdException($"Machine ID must be between 0 and {(1 << BitLenMachineID) - 1}, but received {machineID}.");
+                throw new ArgumentException("The sum of MachineID and Sequence bit lengths cannot exceed 22.");
+            }
+
+            if (machineID > (1u << _bitLenMachineID) - 1)
+            {
+                throw new InvalidMachineIdException($"Machine ID must be between 0 and {(1 << _bitLenMachineID) - 1}, but received {machineID}.");
             }
 
             _machineID = machineID;
@@ -45,6 +54,12 @@ namespace SnowflakeGenerator
             _customEpoch = settings?.CustomEpoch?.ToUnixTimeMilliseconds() ?? 0;
 
             _lastTimestamp = DateTimeOffset.UtcNow.ToUnixTimeMilliseconds() - _customEpoch;
+
+            _sequenceMask = (1u << _bitLenSequence) - 1;
+
+            _timestampShift = _bitLenMachineID + _bitLenSequence;
+
+            _machineIDShift = _bitLenSequence;
 
         }
 
