@@ -1,6 +1,5 @@
 # SnowflakeGenerator
-SnowflakeGenerator is a unique ID generator based on [Twitter's Snowflake](https://blog.twitter.com/engineering/en_us/a/2010/announcing-snowflake "Twitter Snowflake Blog").
-It generates 64-bit, time-ordered, unique IDs based on the Snowflake algorithm. It is written in C# and is compatible with .NET Standard 2.0.
+SnowflakeGenerator is a unique ID generator based on [Twitter's Snowflake](https://blog.twitter.com/engineering/en_us/a/2010/announcing-snowflake "Twitter Snowflake Blog"). It generates 64-bit, time-ordered, unique IDs based on the Snowflake algorithm. It is written in C# and is compatible with .NET Standard 2.0.
 
 The default bit assignment for this Snowflake implementation is:
 ```
@@ -14,7 +13,8 @@ This provides by default:
  - Use of 1024 (2^10) unique MachineIDs across a distributed deployment.
  - Generation for a maximum of 4096 (2^12) IDs per ms from a single Snowflake instance.
  
-If you require a higher generation rate or large range of MachineID's these values can be customised by the Settings used to initialize a Snowflake instance. 
+If you require a higher generation rate or large range of MachineID's these values can be customised by the Settings used to initialize a Snowflake instance.
+
 **_NOTE:_** 42 bits is always reserved for the TimeStamp value. Therefore, the sum of the MachineIDBitLength and SequenceBitLength cannot exceed 22. With the SequenceBitLength being at least equal to 1.
 
 # Features
