@@ -59,6 +59,11 @@ Generate a new unique ID:
 ulong id = snowflake.NextID();
 ```
 
+Decode ID content:
+```csharp
+var (timeStamp, machineId, sequence) = sonyflake.DecodeID(uniqueId);
+```
+
 `NextID()` will throw a `TimestampOverflowException` once it reaches the limit of the TimeStamp.
 
 ## Settings
