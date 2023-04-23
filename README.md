@@ -11,11 +11,11 @@ SnowflakeGenerator is a unique ID generator based on [Twitter's Snowflake](https
 # Installation
 
 To install the SnowflakeGenerator library, you can use the following command in the Package Manager Console:
-```
-Install-Package SnowflakeGenerator`
+```csharp
+Install-Package SnowflakeGenerator
 ```
 Alternatively, you can use the .NET CLI:
-```
+```csharp
 dotnet add package SnowflakeGenerator
 ```
 
