@@ -70,7 +70,17 @@ namespace SnowflakeGenerator
 
             _machineIDShift = _bitLenSequence;
 
-            _maxTimestamp = (1L << (64 - _timestampShift)) - 1 + _customEpoch;
+            try
+            {
+                checked
+                {
+                    _maxTimestamp = (1L << (64 - _timestampShift)) - 1 + _customEpoch;
+                }
+            }
+            catch (OverflowException)
+            {
+                throw new InvalidCustomEpochException("The custom epoch is too large, causing the maximum timestamp to overflow. Please provide a smaller custom epoch.");
+            }
         }
 
         /// <summary>
