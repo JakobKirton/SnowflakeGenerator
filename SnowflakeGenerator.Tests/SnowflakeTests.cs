@@ -153,7 +153,7 @@ namespace SnowflakeGenerator.Tests
         public void MaximumMachineIdTest()
         {
             var settings = new Settings { MachineID = (1 << 10) - 1 };
-            Snowflake snowflake = null;
+            Snowflake? snowflake = null;
             Exception exception = Record.Exception(() => snowflake = new Snowflake(settings));
 
             Assert.Null(exception);
@@ -162,7 +162,7 @@ namespace SnowflakeGenerator.Tests
 
         [Fact]
         [Trait("Category", "Stress")]
-        public async Task MaximumSequenceNumberTest()
+        public void MaximumSequenceNumberTest()
         {
             var settings = new Settings();
             var snowflake = new Snowflake(settings);
