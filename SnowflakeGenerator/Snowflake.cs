@@ -30,14 +30,21 @@ namespace SnowflakeGenerator
         {
             uint machineID = settings?.MachineID ?? 0;
 
-            _bitLenMachineID = settings?.MachineIDBitLength ?? 10;
-            _bitLenSequence = settings?.SequenceBitLength ?? 12;
+            int machineIDBitLength = settings?.MachineIDBitLength ?? 10;
+            int sequenceBitLength = settings?.SequenceBitLength ?? 12;
 
-            // Validate the sum of bit lengths
-            if (_bitLenMachineID + _bitLenSequence > 22)
+            if (sequenceBitLength < 1)
             {
-                throw new ArgumentException("The sum of MachineID and Sequence bit lengths cannot exceed 22.");
+                throw new InvalidBitLengthException("SequenceBitLength must be at least 1.");
             }
+
+            if (machineIDBitLength + sequenceBitLength > 22)
+            {
+                throw new InvalidBitLengthException($"The sum of machine ID bit length and sequence bit length cannot exceed 22. Given machine ID bit length: {machineIDBitLength}, sequence bit length: {sequenceBitLength}.");
+            }
+
+            _bitLenMachineID = machineIDBitLength;
+            _bitLenSequence = sequenceBitLength;
 
             if (machineID > (1u << _bitLenMachineID) - 1)
             {

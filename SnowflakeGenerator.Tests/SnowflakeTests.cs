@@ -55,6 +55,38 @@ namespace SnowflakeGenerator.Tests
 
         [Fact]
         [Trait("Category", "Unit")]
+        public void NextID_WithCustomMachineIDBitLength_GeneratesUniqueIDs()
+        {
+            // Arrange
+            var settings = new Settings { MachineIDBitLength = 8};
+            var snowflake = new Snowflake(settings);
+
+            // Act
+            var id1 = snowflake.NextID();
+            var id2 = snowflake.NextID();
+
+            // Assert
+            Assert.NotEqual(id1, id2);
+        }
+
+        [Fact]
+        [Trait("Category", "Unit")]
+        public void NextID_WithCustomSequenceBitLength_GeneratesUniqueIDs()
+        {
+            // Arrange
+            var settings = new Settings {SequenceBitLength = 8};
+            var snowflake = new Snowflake(settings);
+
+            // Act
+            var id1 = snowflake.NextID();
+            var id2 = snowflake.NextID();
+
+            // Assert
+            Assert.NotEqual(id1, id2);
+        }
+
+        [Fact]
+        [Trait("Category", "Unit")]
         public void Constructor_WithInvalidMachineID_ThrowsInvalidMachineIdException()
         {
             // Arrange
@@ -73,6 +105,28 @@ namespace SnowflakeGenerator.Tests
 
             // Act & Assert
             Assert.Throws<InvalidCustomEpochException>(() => new Snowflake(settings));
+        }
+
+        [Fact]
+        [Trait("Category", "Unit")]
+        public void Constructor_WithInvalidSequenceBitLength_ThrowsInvalidBitLengthException()
+        {
+            // Arrange
+            var settings = new Settings { MachineIDBitLength = 8, SequenceBitLength = 0 };
+
+            // Act & Assert
+            Assert.Throws<InvalidBitLengthException>(() => new Snowflake(settings));
+        }
+
+        [Fact]
+        [Trait("Category", "Unit")]
+        public void Constructor_WithInvalidMachineIDBitLength_ThrowsInvalidBitLengthException()
+        {
+            // Arrange
+            var settings = new Settings { MachineIDBitLength = 25, SequenceBitLength = 2 };
+
+            // Act & Assert
+            Assert.Throws<InvalidBitLengthException>(() => new Snowflake(settings));
         }
 
         [Fact]
