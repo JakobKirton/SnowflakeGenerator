@@ -149,6 +149,27 @@ namespace SnowflakeGenerator.Tests
         }
 
         [Fact]
+        [Trait("Category", "Unit")]
+        public void MaxTimestampOverflow_ThrowsInvalidCustomEpochException()
+        {
+            // Arrange
+            var settings = new Settings
+            {
+                MachineID = 0,
+                CustomEpoch = DateTimeOffset.MaxValue, // Set the custom epoch to the maximum possible DateTimeOffset
+                MachineIDBitLength = 10,
+                SequenceBitLength = 12
+            };
+
+            // Act and Assert
+            Assert.Throws<InvalidCustomEpochException>(() =>
+            {
+                var snowflake = new Snowflake(settings);
+                snowflake.NextID();
+            });
+        }
+
+        [Fact]
         [Trait("Category", "Stress")]
         public void MaximumMachineIdTest()
         {
