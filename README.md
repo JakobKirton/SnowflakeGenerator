@@ -1,5 +1,6 @@
 # SnowflakeGenerator
-SnowflakeGenerator is a unique ID generator based on [Twitter's Snowflake](https://blog.twitter.com/engineering/en_us/a/2010/announcing-snowflake "Twitter Snowflake Blog"). It generates 64-bit, time-ordered, unique IDs based on the Snowflake algorithm. It is written in C# and is compatible with .NET Standard 2.0.
+SnowflakeGenerator is a unique ID generator based on [Twitter's Snowflake](https://blog.twitter.com/engineering/en_us/a/2010/announcing-snowflake "Twitter Snowflake Blog").
+It generates 64-bit, time-ordered, unique IDs based on the Snowflake algorithm. It is written in C# and is compatible with .NET Standard 2.0.
 
 # Features
 
