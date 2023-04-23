@@ -130,6 +130,25 @@ namespace SnowflakeGenerator.Tests
         }
 
         [Fact]
+        [Trait("Category", "Unit")]
+        public void TimestampOverflow_ThrowsException()
+        {
+            // Prepare settings with a custom epoch close to the current time
+            var settings = new Settings
+            {
+                CustomEpoch = DateTimeOffset.UtcNow.AddMilliseconds(-((1L << (64 - 22)) - 2)),
+                MachineIDBitLength = 10,
+                SequenceBitLength = 12
+            };
+
+            // Create a Snowflake instance with the settings
+            var snowflake = new Snowflake(settings);
+
+            // Assert that a TimestampOverflowException is thrown on the next ID generation
+            Assert.Throws<TimestampOverflowException>(() => snowflake.NextID());
+        }
+
+        [Fact]
         [Trait("Category", "Stress")]
         public void MaximumMachineIdTest()
         {
