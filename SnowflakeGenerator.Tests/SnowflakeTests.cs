@@ -94,12 +94,12 @@ namespace SnowflakeGenerator.Tests
             var settings = new Settings();
             var snowflake = new Snowflake(settings);
 
-            var ids = new HashSet<ulong>();
+            var ids = new HashSet<long>();
             int idCount = (1 << 12) + 100;
 
             for (int i = 0; i < idCount; i++)
             {
-                ulong id = snowflake.NextID();
+                long id = snowflake.NextID();
                 Assert.DoesNotContain(id, ids);
                 ids.Add(id);
             }
@@ -113,11 +113,11 @@ namespace SnowflakeGenerator.Tests
             var snowflake = new Snowflake(settings);
 
             int idCount = 10_000;
-            var ids = new HashSet<ulong>();
+            var ids = new HashSet<long>();
 
             for (int i = 0; i < idCount; i++)
             {
-                ulong id = snowflake.NextID();
+                long id = snowflake.NextID();
                 Assert.DoesNotContain(id, ids);
                 ids.Add(id);
             }
@@ -129,12 +129,12 @@ namespace SnowflakeGenerator.Tests
         {
             var settings = new Settings();
             var snowflake = new Snowflake(settings);
-            var ids = new List<ulong>();
+            var ids = new List<long>();
             int idCount = 100;
 
             for (int i = 0; i < idCount; i++)
             {
-                ulong id = snowflake.NextID();
+                long id = snowflake.NextID();
                 ids.Add(id);
                 await Task.Delay(1);
             }
@@ -149,7 +149,7 @@ namespace SnowflakeGenerator.Tests
         {
             var settings = new Settings();
             var snowflake = new Snowflake(settings);
-            var ids = new ConcurrentBag<ulong>();
+            var ids = new ConcurrentBag<long>();
             int idCount = 1000;
             int threadCount = 10;
 
@@ -172,7 +172,7 @@ namespace SnowflakeGenerator.Tests
             await Task.WhenAll(tasks);
 
             // Check uniqueness
-            var uniqueIds = new HashSet<ulong>(ids);
+            var uniqueIds = new HashSet<long>(ids);
             Assert.Equal(ids.Count, uniqueIds.Count);
         }
     }
