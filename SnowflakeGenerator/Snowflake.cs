@@ -70,7 +70,7 @@ namespace SnowflakeGenerator
 
             _machineIDShift = _bitLenSequence;
 
-            _maxTimestamp = (1L << (64 - _timestampShift)) - 1;
+            _maxTimestamp = (1L << (64 - _timestampShift)) - 1 + _customEpoch;
         }
 
         /// <summary>
@@ -132,6 +132,19 @@ namespace SnowflakeGenerator
 
             // Apply a mask to unset the most significant bit
             return (long)(id & 0x7FFFFFFFFFFFFFFF);
+        }
+
+        public (long Timestamp, uint MachineID, uint Sequence) DecodeID(long id)
+        {
+            long timestampMask = (1L << (64 - _timestampShift)) - 1;
+            long machineIDMask = (1L << _bitLenMachineID) - 1;
+            long sequenceMask = (1L << _bitLenSequence) - 1;
+
+            long timestamp = (id >> _timestampShift) & timestampMask;
+            uint machineID = (uint)((id >> _machineIDShift) & machineIDMask);
+            uint sequence = (uint)(id & sequenceMask);
+
+            return (timestamp, machineID, sequence);
         }
     }
 }
