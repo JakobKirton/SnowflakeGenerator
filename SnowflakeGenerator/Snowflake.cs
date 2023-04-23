@@ -22,6 +22,8 @@ namespace SnowflakeGenerator
         private readonly int _timestampShift;
         private readonly int _machineIDShift;
 
+        private readonly long _maxTimestamp;
+
         /// <summary>
         /// Initializes a new instance of the Snowflake class with the specified settings.
         /// </summary>
@@ -68,12 +70,13 @@ namespace SnowflakeGenerator
 
             _machineIDShift = _bitLenSequence;
 
+            _maxTimestamp = (1L << (64 - _timestampShift)) - 1;
         }
 
         /// <summary>
         /// Generates a new unique ID.
         /// </summary>
-        /// <returns>A new unique ID as a 64-bit unsigned integer.</returns>
+        /// <returns>A new unique ID as a 64-bit signed integer.</returns>
         /// <exception cref="SnowflakeException">Thrown when an ID generation error occurs.</exception>
         public long NextID()
         {
@@ -112,6 +115,12 @@ namespace SnowflakeGenerator
                     }
                     spinWait.SpinOnce();
                 }
+            }
+
+            // Check if the timestamp has exceeded its limit
+            if (elapsedTime >= _maxTimestamp)
+            {
+                throw new TimestampOverflowException("The timestamp has exceeded its limit. Unable to generate a new Snowflake ID.");
             }
 
             Interlocked.Add(ref _lastTimestamp, elapsedTime - _lastTimestamp);
