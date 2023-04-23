@@ -13,7 +13,7 @@ Console.WriteLine("Generating 10 unique ID values.\n");
 
 for (int i = 0; i < 10; i++)
 {
-    ulong uniqueId;
+    long uniqueId;
     try
     {
         uniqueId = sonyflake.NextID();
