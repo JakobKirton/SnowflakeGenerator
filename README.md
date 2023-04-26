@@ -56,7 +56,7 @@ Snowflake snowflake = new Snowflake(settings);
 Generate a new unique ID:
 
 ```csharp
-ulong id = snowflake.NextID();
+long id = snowflake.NextID();
 ```
 
 Decode ID content:
