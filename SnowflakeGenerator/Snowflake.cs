@@ -95,19 +95,21 @@ namespace SnowflakeGenerator
 
             elapsedTime = DateTimeOffset.UtcNow.ToUnixTimeMilliseconds() - _customEpoch;
 
-            // Wait for the next millisecond if the current timestamp is the same as the last timestamp
-            if (elapsedTime == _lastTimestamp)
+            // Atomically attempt to reset the sequence value to 0
+            if (elapsedTime != _lastTimestamp && _sequence != 0)
             {
-                SpinWait spinWait = new SpinWait();
-                while (elapsedTime == _lastTimestamp)
+                sequence = (uint)Interlocked.CompareExchange(ref _sequence, 0, _sequence);
+
+                if (sequence != 0u)
                 {
-                    spinWait.SpinOnce();
-                    elapsedTime = DateTimeOffset.UtcNow.ToUnixTimeMilliseconds() - _customEpoch;
+                    // Atomically increment and get the sequence value
+                    sequence = (uint)Interlocked.Add(ref _sequence, 1) & _sequenceMask;
                 }
             }
-
-            // Atomically increment and get the sequence value
-            sequence = (uint)Interlocked.Add(ref _sequence, 1) & _sequenceMask;
+            else
+            {
+                sequence = (uint)Interlocked.Add(ref _sequence, 1) & _sequenceMask;
+            }
 
             // If the sequence has reached its maximum value, wait for the next millisecond
             if (sequence == _sequenceMask)
