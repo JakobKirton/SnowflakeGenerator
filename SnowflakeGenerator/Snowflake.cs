@@ -50,7 +50,7 @@ namespace SnowflakeGenerator
 
             if (machineID > (1u << _bitLenMachineID) - 1)
             {
-                throw new InvalidMachineIdException($"Machine ID must be between 0 and {(1 << _bitLenMachineID) - 1}, but received {machineID}.");
+                throw new InvalidMachineIdException($"Machine ID must be between 0 and {(1u << _bitLenMachineID) - 1}, but received {machineID}.");
             }
 
             _machineID = machineID;
@@ -93,6 +93,8 @@ namespace SnowflakeGenerator
             long elapsedTime;
             uint sequence;
 
+            SpinWait spinWait = new SpinWait();
+
             elapsedTime = DateTimeOffset.UtcNow.ToUnixTimeMilliseconds() - _customEpoch;
 
             // Atomically attempt to reset the sequence value to 0
@@ -114,7 +116,6 @@ namespace SnowflakeGenerator
             // If the sequence has reached its maximum value, wait for the next millisecond
             if (sequence == _sequenceMask)
             {
-                SpinWait spinWait = new SpinWait();
                 while (true)
                 {
                     long nextNow = DateTimeOffset.UtcNow.ToUnixTimeMilliseconds();
@@ -135,7 +136,18 @@ namespace SnowflakeGenerator
                 throw new TimestampOverflowException("The timestamp has exceeded its limit. Unable to generate a new Snowflake ID.");
             }
 
-            Interlocked.Add(ref _lastTimestamp, elapsedTime - _lastTimestamp);
+            long original, newValue;
+            do
+            {
+                original = _lastTimestamp;
+                newValue = elapsedTime;
+
+                // If the CompareExchange fails, it means there was contention. Use SpinWait before trying again.
+                if (Interlocked.CompareExchange(ref _lastTimestamp, newValue, original) != original)
+                {
+                    spinWait.SpinOnce();
+                }
+            } while (original != _lastTimestamp);
 
             // Construct the ID from the timestamp, machine ID, and sequence number
             ulong id = ((ulong)elapsedTime << _timestampShift) |
