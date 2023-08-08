@@ -3,19 +3,19 @@ SnowflakeGenerator is a unique ID generator based on [Twitter's Snowflake](https
 
 The default bit assignment for this Snowflake implementation is:
 ```
-42 bits for the TimeStamp value
+41 bits for the TimeStamp value
 10 bits for the MachineID value
 12 bits for Sequence value
 ```
 This provides by default:
 
- - A time range of approximately 139 years (2^42 milliseconds).
+ - A time range of approximately 69 years (2^41 milliseconds).
  - Use of 1024 (2^10) unique MachineIDs across a distributed deployment.
  - Generation for a maximum of 4096 (2^12) IDs per ms from a single Snowflake instance.
  
 If you require a higher generation rate or large range of MachineID's these values can be customised by the Settings used to initialize a Snowflake instance.
 
-**_NOTE:_** 42 bits is always reserved for the TimeStamp value. Therefore, the sum of the MachineIDBitLength and SequenceBitLength cannot exceed 22. With the SequenceBitLength being at least equal to 1.
+**_NOTE:_** 41 bits is always reserved for the TimeStamp value. Therefore, the sum of the MachineIDBitLength and SequenceBitLength cannot exceed 22. With the SequenceBitLength being at least equal to 1.
 
 # Features
 

@@ -74,7 +74,7 @@ namespace SnowflakeGenerator
             {
                 checked
                 {
-                    _maxTimestamp = (1L << (64 - _timestampShift)) - 1 + _customEpoch;
+                    _maxTimestamp = (1L << (63 - _timestampShift)) - 1 + _customEpoch;
                 }
             }
             catch (OverflowException)
@@ -150,17 +150,16 @@ namespace SnowflakeGenerator
             } while (original != _lastTimestamp);
 
             // Construct the ID from the timestamp, machine ID, and sequence number
-            ulong id = ((ulong)elapsedTime << _timestampShift) |
-                       ((ulong)_machineID << _machineIDShift) |
+            long id = (elapsedTime << _timestampShift) |
+                       ((long)_machineID << _machineIDShift) |
                        sequence;
 
-            // Apply a mask to unset the most significant bit
-            return (long)(id & 0x7FFFFFFFFFFFFFFF);
+            return id;
         }
 
         public (long Timestamp, uint MachineID, uint Sequence) DecodeID(long id)
         {
-            long timestampMask = (1L << (64 - _timestampShift)) - 1;
+            long timestampMask = (1L << (63 - _timestampShift)) - 1;
             long machineIDMask = (1L << _bitLenMachineID) - 1;
             long sequenceMask = (1L << _bitLenSequence) - 1;
 
