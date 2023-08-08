@@ -12,7 +12,7 @@
     <PackageLicenseFile>LICENSE</PackageLicenseFile>
     <Description>Unique 64-bit, time-ordered ID Generator.</Description>
     <PackageProjectUrl></PackageProjectUrl>
-    <Version>$(VersionPrefix)</Version>
+    <Version>2.0.0</Version>
   </PropertyGroup>
 
   <ItemGroup>
