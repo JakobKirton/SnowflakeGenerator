@@ -1,6 +1,8 @@
 # SnowflakeGenerator
 SnowflakeGenerator is a unique ID generator based on [Twitter's Snowflake](https://blog.twitter.com/engineering/en_us/a/2010/announcing-snowflake "Twitter Snowflake Blog"). It generates 64-bit, time-ordered, unique IDs based on the Snowflake algorithm. It is written in C# and is compatible with .NET Standard 2.0.
 
+Available as a [NuGet Package](https://www.nuget.org/packages/SnowflakeGenerator "SnowflakeGenerator").
+
 The default bit assignment for this Snowflake implementation is:
 ```
 41 bits for the TimeStamp value
