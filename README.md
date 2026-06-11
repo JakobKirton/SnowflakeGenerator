@@ -1,4 +1,10 @@
 # SnowflakeGenerator
+
+[![NuGet Version](https://img.shields.io/nuget/v/SnowflakeGenerator)](https://www.nuget.org/packages/SnowflakeGenerator)
+[![NuGet Downloads](https://img.shields.io/nuget/dt/SnowflakeGenerator)](https://www.nuget.org/packages/SnowflakeGenerator)
+[![CI/CD](https://github.com/JakobKirton/SnowflakeGenerator/actions/workflows/main.yml/badge.svg)](https://github.com/JakobKirton/SnowflakeGenerator/actions/workflows/main.yml)
+[![License: MIT](https://img.shields.io/github/license/JakobKirton/SnowflakeGenerator)](https://github.com/JakobKirton/SnowflakeGenerator/blob/main/LICENSE)
+
 SnowflakeGenerator is a unique ID generator based on [Twitter's Snowflake](https://blog.twitter.com/engineering/en_us/a/2010/announcing-snowflake "Twitter Snowflake Blog"). It generates 64-bit, time-ordered, unique IDs based on the Snowflake algorithm. It is written in C# and is compatible with .NET Standard 2.0.
 
 Available as a [NuGet Package](https://www.nuget.org/packages/SnowflakeGenerator "SnowflakeGenerator").
