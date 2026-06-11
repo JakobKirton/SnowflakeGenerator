@@ -131,6 +131,17 @@ namespace SnowflakeGenerator.Tests
 
         [Fact]
         [Trait("Category", "Unit")]
+        public void Constructor_WithNegativeMachineIDBitLength_ThrowsInvalidBitLengthException()
+        {
+            // Arrange
+            var settings = new Settings { MachineIDBitLength = -5, SequenceBitLength = 12 };
+
+            // Act & Assert
+            Assert.Throws<InvalidBitLengthException>(() => new Snowflake(settings));
+        }
+
+        [Fact]
+        [Trait("Category", "Unit")]
         public void TimestampOverflow_ThrowsException()
         {
             // Prepare settings with a custom epoch close to the current time
@@ -247,20 +258,19 @@ namespace SnowflakeGenerator.Tests
             int idCount = 1000;
             int threadCount = 10;
 
-            Task GenerateIds()
+            void GenerateIds()
             {
                 for (int i = 0; i < idCount; i++)
                 {
                     ids.Add(snowflake.NextID());
                 }
-                return Task.CompletedTask;
             }
 
             var tasks = new List<Task>();
 
             for (int i = 0; i < threadCount; i++)
             {
-                tasks.Add(GenerateIds());
+                tasks.Add(Task.Run(GenerateIds));
             }
 
             await Task.WhenAll(tasks);

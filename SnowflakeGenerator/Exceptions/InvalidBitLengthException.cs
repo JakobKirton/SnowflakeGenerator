@@ -1,5 +1,8 @@
 ﻿namespace SnowflakeGenerator.Exceptions
 {
+    /// <summary>
+    /// The exception that is thrown when the configured machine ID or sequence bit lengths are invalid.
+    /// </summary>
     public class InvalidBitLengthException : SnowflakeException
     {
         /// <summary>

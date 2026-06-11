@@ -63,7 +63,7 @@ long id = snowflake.NextID();
 
 Decode ID content:
 ```csharp
-var (timeStamp, machineId, sequence) = sonyflake.DecodeID(uniqueId);
+var (timeStamp, machineId, sequence) = snowflake.DecodeID(uniqueId);
 ```
 
 `NextID()` will throw a `TimestampOverflowException` once it reaches the limit of the TimeStamp.

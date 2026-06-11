@@ -1,5 +1,8 @@
 ﻿namespace SnowflakeGenerator.Exceptions
 {
+    /// <summary>
+    /// The exception that is thrown when the provided machine ID is outside the allowed range.
+    /// </summary>
     public class InvalidMachineIdException : SnowflakeException
     {
         /// <summary>

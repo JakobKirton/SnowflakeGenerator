@@ -1,5 +1,8 @@
 ﻿namespace SnowflakeGenerator.Exceptions
 {
+    /// <summary>
+    /// The exception that is thrown when the timestamp exceeds the range representable by the ID layout.
+    /// </summary>
     public class TimestampOverflowException : SnowflakeException
     {
         /// <summary>

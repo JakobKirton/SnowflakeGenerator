@@ -1,5 +1,8 @@
 ﻿namespace SnowflakeGenerator.Exceptions
 {
+    /// <summary>
+    /// The exception that is thrown when the configured custom epoch is invalid.
+    /// </summary>
     public class InvalidCustomEpochException : SnowflakeException
     {
         /// <summary>

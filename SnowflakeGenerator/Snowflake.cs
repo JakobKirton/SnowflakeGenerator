@@ -17,6 +17,7 @@ namespace SnowflakeGenerator
 
         private long _lastTimestamp;
         private int _sequence;
+        private readonly object _lock = new object();
 
         private readonly uint _sequenceMask;
         private readonly int _timestampShift;
@@ -38,6 +39,11 @@ namespace SnowflakeGenerator
             if (sequenceBitLength < 1)
             {
                 throw new InvalidBitLengthException("SequenceBitLength must be at least 1.");
+            }
+
+            if (machineIDBitLength < 0)
+            {
+                throw new InvalidBitLengthException("MachineIDBitLength cannot be negative.");
             }
 
             if (machineIDBitLength + sequenceBitLength > 22)
@@ -62,7 +68,8 @@ namespace SnowflakeGenerator
 
             _customEpoch = settings?.CustomEpoch?.ToUnixTimeMilliseconds() ?? 0;
 
-            _lastTimestamp = DateTimeOffset.UtcNow.ToUnixTimeMilliseconds() - _customEpoch;
+            // Sentinel meaning "no ID generated yet" so the first NextID() of this millisecond starts the sequence at 0.
+            _lastTimestamp = -1L;
 
             _sequenceMask = (1u << _bitLenSequence) - 1;
 
@@ -70,93 +77,76 @@ namespace SnowflakeGenerator
 
             _machineIDShift = _bitLenSequence;
 
-            try
-            {
-                checked
-                {
-                    _maxTimestamp = (1L << (63 - _timestampShift)) - 1 + _customEpoch;
-                }
-            }
-            catch (OverflowException)
-            {
-                throw new InvalidCustomEpochException("The custom epoch is too large, causing the maximum timestamp to overflow. Please provide a smaller custom epoch.");
-            }
+            _maxTimestamp = (1L << (63 - _timestampShift)) - 1;
         }
 
         /// <summary>
         /// Generates a new unique ID.
         /// </summary>
         /// <returns>A new unique ID as a 64-bit signed integer.</returns>
-        /// <exception cref="SnowflakeException">Thrown when an ID generation error occurs.</exception>
+        /// <remarks>
+        /// This method is thread-safe; concurrent callers are serialized so that no two IDs are ever identical.
+        /// To preserve that guarantee the system clock is never allowed to move backwards: if the clock is stepped
+        /// back (for example by an aggressive NTP adjustment) the generator continues from the last observed
+        /// timestamp. If the per-millisecond sequence is also exhausted during such a regression, the call spins
+        /// until real time advances past the last observed timestamp — never issuing a duplicate.
+        /// </remarks>
+        /// <exception cref="TimestampOverflowException">Thrown when the timestamp has exceeded the range representable by the ID layout.</exception>
         public long NextID()
         {
-            long elapsedTime;
-            uint sequence;
-
-            SpinWait spinWait = new SpinWait();
-
-            elapsedTime = DateTimeOffset.UtcNow.ToUnixTimeMilliseconds() - _customEpoch;
-
-            // Atomically attempt to reset the sequence value to 0
-            if (elapsedTime != _lastTimestamp && _sequence != 0)
+            lock (_lock)
             {
-                sequence = (uint)Interlocked.CompareExchange(ref _sequence, 0, _sequence);
+                long elapsedTime = DateTimeOffset.UtcNow.ToUnixTimeMilliseconds() - _customEpoch;
 
-                if (sequence != 0u)
+                // Guard against the system clock moving backwards (e.g. NTP adjustment).
+                if (elapsedTime < _lastTimestamp)
                 {
-                    // Atomically increment and get the sequence value
-                    sequence = (uint)Interlocked.Add(ref _sequence, 1) & _sequenceMask;
+                    elapsedTime = _lastTimestamp;
                 }
-            }
-            else
-            {
-                sequence = (uint)Interlocked.Add(ref _sequence, 1) & _sequenceMask;
-            }
 
-            // If the sequence has reached its maximum value, wait for the next millisecond
-            if (sequence == _sequenceMask)
-            {
-                while (true)
+                if (elapsedTime == _lastTimestamp)
                 {
-                    long nextNow = DateTimeOffset.UtcNow.ToUnixTimeMilliseconds();
-                    long nextElapsedTime = nextNow - _customEpoch;
+                    _sequence = (int)((_sequence + 1) & _sequenceMask);
 
-                    if (nextElapsedTime > elapsedTime)
+                    // Sequence exhausted for this millisecond; wait for the next one.
+                    if (_sequence == 0)
                     {
-                        elapsedTime = nextElapsedTime;
-                        break;
+                        SpinWait spinWait = new SpinWait();
+                        do
+                        {
+                            spinWait.SpinOnce();
+                            elapsedTime = DateTimeOffset.UtcNow.ToUnixTimeMilliseconds() - _customEpoch;
+                        } while (elapsedTime <= _lastTimestamp);
                     }
-                    spinWait.SpinOnce();
                 }
-            }
-
-            // Check if the timestamp has exceeded its limit
-            if (elapsedTime >= _maxTimestamp)
-            {
-                throw new TimestampOverflowException("The timestamp has exceeded its limit. Unable to generate a new Snowflake ID.");
-            }
-
-            long original, newValue;
-            do
-            {
-                original = _lastTimestamp;
-                newValue = elapsedTime;
-
-                // If the CompareExchange fails, it means there was contention. Use SpinWait before trying again.
-                if (Interlocked.CompareExchange(ref _lastTimestamp, newValue, original) != original)
+                else
                 {
-                    spinWait.SpinOnce();
+                    _sequence = 0;
                 }
-            } while (original != _lastTimestamp);
 
-            // Construct the ID from the timestamp, machine ID, and sequence number
-            long id = (elapsedTime << _timestampShift) |
+                // Check if the timestamp has exceeded its limit
+                if (elapsedTime >= _maxTimestamp)
+                {
+                    throw new TimestampOverflowException("The timestamp has exceeded its limit. Unable to generate a new Snowflake ID.");
+                }
+
+                _lastTimestamp = elapsedTime;
+
+                // Construct the ID from the timestamp, machine ID, and sequence number
+                return (elapsedTime << _timestampShift) |
                        ((long)_machineID << _machineIDShift) |
-                       sequence;
-
-            return id;
+                       (uint)_sequence;
+            }
         }
 
+        /// <summary>
+        /// Decodes a Snowflake ID into its constituent parts.
+        /// </summary>
+        /// <param name="id">The Snowflake ID to decode.</param>
+        /// <returns>
+        /// A tuple containing the epoch-relative timestamp (in milliseconds since the configured custom epoch),
+        /// the machine ID, and the sequence number encoded in the ID.
+        /// </returns>
         public (long Timestamp, uint MachineID, uint Sequence) DecodeID(long id)
         {
             long timestampMask = (1L << (63 - _timestampShift)) - 1;
